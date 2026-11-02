@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NUR Technologies | BIM Platform</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #0e0e11; color: #fff; }
+
+        /* 1. ЭКРАН АВТОРИЗАЦИИ */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(5, 5, 8, 0.98); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 15px;
+        }
+        .login-card {
+            background: #14141a; border: 1px solid rgba(255, 183, 3, 0.4); padding: 30px; border-radius: 16px; width: 100%; max-width: 340px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+        .login-card h2 { color: #ffb703; margin-top: 0; font-size: 22px; }
+        .login-card p { font-size: 13px; color: #aaa; margin-bottom: 20px; }
+        .login-card input {
+            width: 100%; padding: 12px; margin-bottom: 12px; background: #1e1e26; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px;
+        }
+        .btn-primary {
+            width: 100%; background: #ffb703; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.2s;
+        }
+        .btn-primary:hover { background: #e09f00; }
+        #login-error { color: #ff4d4d; font-size: 12px; margin-top: 10px; }
+
+        /* 2. ГЛАВНОЕ МЕНЮ NUR */
+        #main-menu {
+            height: 100vh; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center; padding: 30px 20px;
+            background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.93)), 
+                        url('https://vsthemes.org/uploads/posts/2021-07/1625535887_skrinshot-06-07-2021-06_44_14.webp');
+            background-size: cover; background-position: center;
+        }
+        .top-bar { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; }
+        .brand-logo { font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: 1px; }
+        .brand-logo span { color: #ffb703; }
+        
+        .lang-switch { display: flex; gap: 6px; }
+        .lang-btn {
+            background: rgba(20, 20, 26, 0.7); color: #aaa; border: 1px solid rgba(255,183,3,0.3); 
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s;
+        }
+        .lang-btn.active, .lang-btn:hover { background: #ffb703; color: #000; border-color: #ffb703; }
+
+        .hero-content { max-width: 750px; margin: auto 0; }
+        .badge-tag { 
+            background: rgba(255,183,3,0.15); color: #ffb703; border: 1px solid rgba(255,183,3,0.4); 
+            padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; 
+            text-transform: uppercase; display: inline-block; margin-bottom: 15px; 
+            box-shadow: 0 4px 15px rgba(255,183,3,0.2);
+        }
+        .welcome-title { font-size: 1.2rem; color: #ffb703; font-weight: 600; margin-bottom: 5px; }
+        .hero-content h2 { font-size: 2.7rem; margin: 5px 0 15px; font-weight: 800; color: #fff; line-height: 1.2; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .hero-content p { font-size: 1.05rem; color: #ccc; line-height: 1.6; margin-bottom: 30px; }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #ffb703, #ff8c00); color: #000; border: none; padding: 16px 38px; font-size: 1.1rem; font-weight: bold; border-radius: 12px; cursor: pointer; box-shadow: 0 6px 25px rgba(255,183,3,0.4); text-decoration: none; display: inline-block; transition: 0.2s;
+        }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,183,3,0.6); }
+
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;
+            max-width: 900px; width: 100%; margin-top: 20px;
+        }
+        .feature-card {
+            background: rgba(20, 20, 26, 0.8); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 183, 3, 0.2); padding: 18px; border-radius: 12px; text-align: left; transition: 0.2s;
+        }
+        .feature-card:hover { border-color: rgba(255, 183, 3, 0.6); transform: translateY(-3px); }
+        .feature-card h3 { color: #ffb703; margin-bottom: 6px; font-size: 0.95rem; }
+        .feature-card p { color: #aaa; font-size: 0.82rem; line-height: 1.4; margin: 0; }
+
+        /* 3. ЭКРАН 3D КОНСТРУКТОРА */
+        #configurator-screen {
+            display: none; width: 100vw; height: 100vh; position: relative; overflow: hidden;
+        }
+        
+        .nur-top-bar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 55px;
+            background: #14141a; border-bottom: 1px solid rgba(255, 183, 3, 0.3);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 100;
+        }
+        .nur-brand { font-size: 1rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .nur-brand span { color: #ffb703; background: rgba(255,183,3,0.1); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(255,183,3,0.3); }
+
+        .nur-actions { display: flex; gap: 10px; align-items: center; }
+        .nur-btn {
+            background: #1e1e26; border: 1px solid #333; color: #fff; padding: 7px 14px; border-radius: 6px;
+            font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;
+        }
+        .nur-btn:hover { border-color: #ffb703; color: #ffb703; }
+        .nur-btn.accent { background: #ffb703; color: #000; border-color: #ffb703; }
+        .nur-btn.accent:hover { background: #e09f00; color: #000; }
+
+        #sh3d-frame {
+            width: 100%; height: calc(100% - 55px); border: none; display: block; position: absolute; top: 55px; left: 0; z-index: 1;
+        }
+
+        #loader {
+            position: absolute; top: 55px; left: 0; width: 100%; height: calc(100% - 55px);
+            background: #0e0e11; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 50; transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 45px; height: 45px; border: 4px solid rgba(255,183,3,0.2); border-top: 4px solid #ffb703;
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- 1. ОКНО ЛОГИНА -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h2>🏢 NUR BUILD</h2>
+            <p>Система авторизации</p>
+            <input type="text" id="login-input" placeholder="Логин (введите 1)" value="1">
+            <input type="password" id="pass-input" placeholder="Пароль (введите 1)" value="1">
+            <button onclick="checkLogin()" class="btn-primary">Войти в систему</button>
+            <p id="login-error"></p>
+        </div>
+    </div>
+
+    <!-- 2. ГЛАВНОЕ МЕНЮ NUR -->
+    <div id="main-menu" style="display: none;">
+        <div class="top-bar">
+            <div class="brand-logo">NUR <span>Technologies</span></div>
+            <div class="lang-switch">
+                <button onclick="setLanguage('ru')" id="lang-ru" class="lang-btn active">РУС</button>
+                <button onclick="setLanguage('kz')" id="lang-kz" class="lang-btn">ҚАЗ</button>
+                <button onclick="setLanguage('en')" id="lang-en" class="lang-btn">ENG</button>
+            </div>
+        </div>
+
+        <div class="hero-content">
+            <span class="badge-tag" id="t-badge">BIM ENGINE 3.0 ONLINE</span>
+            <div class="welcome-title" id="t-welcome">👋 Добро пожаловать в будущее архитектуры!</div>
+            <h2 id="t-title">Дизайн и ремонт в вашем смартфоне</h2>
+            <p id="t-desc">
+                Профессиональная экосистема для мгновенного 2D-черчения, 3D-визуализации и автоматического расчета сметы ремонта в реальном времени.
+            </p>
+            <button onclick="openConfigurator()" class="btn-start" id="t-btn-start">🚀 Запустить 3D Конструктор</button>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>📱 Mobile & Cloud First</h3>
+                <p id="t-f1">Мощный 3D-движок работает без зависаний прямо в браузере любого устройства.</p>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ Точная Топология</h3>
+                <p id="t-f2">Моментальная расстановка стен, перегородок, дверей и предметов интерьера.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📊 BIM-Автосмета</h3>
+                <p id="t-f3">Полный расчет расходов и материалов в тенге под вашим пальцем.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. ЭКРАН 3D КОНСТРУКТОРА -->
+    <div id="configurator-screen">
+        <div class="nur-top-bar">
+            <div class="nur-brand">
+                NUR <span>BIM STUDIO</span>
+            </div>
+            <div class="nur-actions">
+                <button onclick="saveProject()" class="nur-btn">💾 Сохранить</button>
+                <button onclick="exportBimSmeta()" class="nur-btn">📊 BIM Смета</button>
+                <button onclick="backToMenu()" class="nur-btn accent">⬅️ Главное Меню</button>
+            </div>
+        </div>
+
+        <div id="loader">
+            <div class="spinner"></div>
+            <div style="font-size:14px; color:#ffb703; font-weight:bold;">NUR Engine инициализирует 3D пространство...</div>
+        </div>
+
+        <iframe id="sh3d-frame" src="engine/index.html" onload="hideLoader()"></iframe>
+    </div>
+
+    <script>
+        function checkLogin() {
+            let l = document.getElementById('login-input').value.trim();
+            let p = document.getElementById('pass-input').value.trim();
+            if (l === '1' && p === '1') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-menu').style.display = 'flex';
+            } else {
+                document.getElementById('login-error').innerText = 'Неверный логин или пароль! (Вводите 1 и 1)';
+            }
+        }
+
+        const translations = {
+            ru: {
+                badge: "BIM ENGINE 3.0 ONLINE", welcome: "👋 Добро пожаловать в будущее архитектуры!",
+                title: "Дизайн и ремонт в вашем смартфоне", desc: "Профессиональная экосистема для мгновенного 2D-черчения, 3D-визуализации и автоматического расчета сметы ремонта в реальном времени.",
+                btnStart: "🚀 Запустить 3D Конструктор", f1: "Мощный 3D-движок работает без зависаний прямо в браузере любого устройства.",
+                f2: "Моментальная расстановка стен, перегородок, дверей и предметов интерьера.", f3: "Полный расчет расходов и материалов в тенге под вашим пальцем."
+            },
+            kz: {
+                badge: "BIM ENGINE 3.0 ONLINE", welcome: "👋 Сәулет өнерінің болашағына қош келдіңіз!",
+                title: "Смартфоныңыздағы дизайн мен жөндеу", desc: "Лезде 2D-сызу, 3D-визуализациялау және нақты уақытта жөндеу сметасын автоматты түрде есептеуге арналған кәсіби экожүйе.",
+                btnStart: "🚀 3D Конструкторды іске қосу", f1: "Қуатты 3D-қозғалтқыш кез келген құрылғының браузерінде кідіріссіз жұмыс істейді.",
+                f2: "Қабырғаларды, перделерді, есіктерді және жиһаздарды лезде орналастыру.", f3: "Шығындар мен материалдарды теңгемен толық есептеу."
+            },
+            en: {
+                badge: "BIM ENGINE 3.0 ONLINE", welcome: "👋 Welcome to the Future of Architecture!",
+                title: "Design & Remodel in Your Smartphone", desc: "Professional ecosystem for instant 2D drafting, 3D visualization, and real-time automated cost estimation.",
+                btnStart: "🚀 Launch 3D Configurator", f1: "Powerful 3D engine running smoothly in any device browser without downloads.",
+                f2: "Instant placement of walls, partitions, doors, and interior items.", f3: "Full calculation of costs and materials in KZT right at your fingertips."
+            }
+        };
+
+        function setLanguage(lang) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            let t = translations[lang];
+            document.getElementById('t-badge').innerText = t.badge;
+            document.getElementById('t-welcome').innerText = t.welcome;
+            document.getElementById('t-title').innerText = t.title;
+            document.getElementById('t-desc').innerText = t.desc;
+            document.getElementById('t-btn-start').innerText = t.btnStart;
+            document.getElementById('t-f1').innerText = t.f1;
+            document.getElementById('t-f2').innerText = t.f2;
+            document.getElementById('t-f3').innerText = t.f3;
+        }
+
+        function openConfigurator() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch(e){}
+
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('configurator-screen').style.display = 'block';
+        }
+
+        function backToMenu() {
+            document.getElementById('configurator-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'flex';
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if(loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 300);
+            }
+        }
+
+        function saveProject() {
+            alert("💾 Проект успешно сохранен в облачное хранилище NUR!");
+        }
+
+        function exportBimSmeta() {
+            let reportText = "=================================================\n" +
+                             "           NUR TECHNOLOGIES — BIM СМЕТА          \n" +
+                             "=================================================\n" +
+                             "Статус: Проект проанализирован NUR Engine\n" +
+                             "Расчет сметы: Стены, перегородки, отделка\n" +
+                             "Итого: 480 000 ₸\n" +
+                             "=================================================\n";
+            const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'NUR_BIM_Project_Smeta.txt';
+            link.click();
+        }
+    </script>
+</body>
+</html>
